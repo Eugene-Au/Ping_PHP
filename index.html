@@ -1,0 +1,56 @@
+<html> 
+<head>
+	<title>Ping</title>	
+	<script type="text/javascript" src="3rdparty/jquery-2.0.2.min.js"></script>
+    <link rel="stylesheet" type='text/css' href='3rdparty/bootstrap-3.3.4-dist/css/bootstrap.min.css'>
+    
+    <script type="text/javascript">
+        $(function() {
+            //event handlers --------------------------------------------------------
+			
+			$('#BtnGo').click(function(){				                                
+                var ip = $('#textIPAddr').val();
+                var counter = 0;
+                var start = $.now();
+                
+                function getIP(){                                        
+                    return $.ajax({
+                        type: 'POST',
+                        url: "ping_json.php",
+                        cache: false,
+                        dataType: "json",                        
+                        data: { 'host': ip}                        
+                    })                    
+                    .then(function (jsonString){
+                        // printing results
+                        var TextBefore = $('#DivRes').html();                        
+                        $('#DivRes').html(TextBefore + '<br>'
+                                          + ip + ' - '+ jsonString[0]  
+                                          + ' - ' + ($.now() - start)/1000 + ' sec' 
+                                         );
+                        start = $.now();
+                        
+                        // doing exactly 4 consecutive PING requests                        
+                        if (++counter < 4){
+                            getIP();
+                        } else
+                        {
+                            $('#BtnGo').prop('disabled', false);
+                        }
+                    });
+                    
+                }
+                
+                $('#BtnGo').prop('disabled', true);
+                getIP();             
+			});
+        });
+    </script>
+</head>
+<body>
+	<input id="textIPAddr" type="text" class="form-control" placeholder="IP Address" />        
+        <button id="BtnGo" class='btn btn-default'>Go</button>
+        <div id="DivRes"> </div>
+    
+</body>
+</html>
